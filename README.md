@@ -6,40 +6,19 @@ Add to cart → checkout → place order in seconds. Built for drops that sell o
 
 Features
 FeatureDescription⚡ One-click checkoutAdd to cart, close popup, go to checkout, save & continue, place order — all automated🎯 Stock SniperWatches the current page every 2.5s and fires the moment it hits MSRP🌐 Multi-URL SniperWatch up to 20 product URLs across all supported sites, checked every 10 seconds⏰ Multi-ScheduleSet multiple timed auto-fires, each with its own URL, label, and settings💰 Budget GuardDisables buying if the price exceeds your limit🔍 Deal FinderShows Great Deal / At MSRP / Overpriced based on real Pokémon Center MSRP data📈 Price HistoryTracks and charts price changes over time⛔ Panic StopKills all snipers and timers instantly🌙 Dark / Light modePokédex-themed UI with toggle
-Supported stores: Target · Walmart · Best Buy · Amazon
+Supported stores: Target
+Unsupported stores: Walmart · Best Buy · Amazon
 
 Installation
 Option A — Download ZIP (easiest)
 
-Go to the Releases page and download the latest pokebot-extension.zip
-Unzip it — you'll get a folder called pokebot-extension
-Skip to Load into Chrome
+Download the ZIP File, unpack it, and go to web browser of your choice. Then you go to the extensions tab.
+From here, turn on developer mode, after that you should see a button that says "Load Unpacked". Click it and select the poke-extension folder. 
 
+⚠️ Make sure you select the one that holds all the JSON's and scripts.
 
-Option B — Clone from GitHub
-You'll need Git installed. Open a terminal and run:
-bashgit clone https://github.com/YOUR_USERNAME/pokebot-extension.git
-This creates a pokebot-extension folder wherever you ran the command.
-
-Windows users: Right-click on your Desktop or any folder → Open in Terminal (or Git Bash), then paste the command above.
-
-
-Mac users: Open Terminal (search Spotlight for "Terminal"), then paste the command.
-
-
-Load into Chrome
-
-Open Chrome and go to:
-
-   chrome://extensions
-
-In the top-right corner, turn on Developer mode
-![Developer mode toggle in the top-right of the extensions page]
-Click Load unpacked
-In the file picker, select the pokebot-extension folder (the one containing manifest.json)
-Pokébot will appear in your extensions list with a Pokéball icon
-Click the puzzle piece icon in your Chrome toolbar, then click the pin next to Pokébot so it's always visible
-
+After that your ready to go, but to activate it, you need to go to the Offical Target Website. 
+Then click a pokemon product of your choosing. This extension is specifically for pokemon ETB's and Booster packs incase of any drops.
 
 Keeping it updated
 If you installed via Git:
