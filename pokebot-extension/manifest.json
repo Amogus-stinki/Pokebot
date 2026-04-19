@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Pokébot",
-  "version": "3.0.0",
-  "description": "Automate TCG purchases on Target, Walmart, Best Buy & Amazon. Multi-URL sniper, multi-schedule, budget guard.",
+  "version": "4.0.0",
+  "description": "Automate TCG purchases on Target, Walmart, Best Buy & Amazon. Sniper, multi-URL, multi-schedule, sound alerts, keyboard shortcut, cart protection.",
   "permissions": ["activeTab", "scripting", "storage", "tabs", "alarms", "notifications"],
   "host_permissions": [
     "https://www.target.com/*",
@@ -12,6 +12,15 @@
   ],
   "background": {
     "service_worker": "background.js"
+  },
+  "commands": {
+    "catch-it": {
+      "suggested_key": {
+        "default": "Alt+Shift+C",
+        "mac": "Alt+Shift+C"
+      },
+      "description": "Trigger Catch It on the current product page (requires Faster Catch It to be enabled)"
+    }
   },
   "action": {
     "default_popup": "popup.html",

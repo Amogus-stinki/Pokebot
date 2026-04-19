@@ -475,6 +475,60 @@
     .sched-url-current { font-size: 10px; color: var(--text3); margin-bottom: 6px; }
     .add-sched-btn { width: 100%; padding: 8px; border-radius: 7px; border: none; background: var(--btn-bg); color: #fff; font-family: 'Press Start 2P', monospace; font-size: 8px; cursor: pointer; letter-spacing: 0.5px; }
     .add-sched-btn:hover { background: var(--btn-hover); }
+
+    /* ── Settings tab ── */
+    .settings-section { margin-bottom: 16px; }
+    .settings-section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 8px; }
+    .settings-opt { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .settings-opt:last-child { border-bottom: none; }
+    .settings-opt-info { flex: 1; }
+    .settings-opt-label { font-size: 12px; font-weight: 600; color: var(--text); }
+    .settings-opt-sub   { font-size: 10px; color: var(--text3); margin-top: 2px; }
+    .settings-shortcut  { font-size: 10px; color: var(--info-txt); background: var(--info-bg); padding: 2px 7px; border-radius: 5px; font-weight: 600; }
+    .export-btn, .import-btn {
+      flex: 1; padding: 8px; border-radius: 7px; font-size: 11px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--text2);
+    }
+    .export-btn:hover { background: var(--surface2); }
+    .import-btn { background: var(--btn-bg); color: #fff; border-color: var(--btn-bg); }
+    .import-btn:hover { background: var(--btn-hover); }
+    .export-import-row { display: flex; gap: 6px; margin-top: 8px; }
+
+    /* ── Notification log ── */
+    .notif-log { max-height: 180px; overflow-y: auto; }
+    .notif-item { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+    .notif-body { flex: 1; }
+    .notif-title { font-size: 11px; font-weight: 600; color: var(--text); }
+    .notif-meta  { font-size: 10px; color: var(--text3); margin-top: 1px; }
+    .notif-empty { font-size: 11px; color: var(--text3); padding: 10px 0; text-align: center; }
+
+    /* ── Per-URL budget in multi-sniper ── */
+    .url-budget-input {
+      width: 70px; font-size: 11px; padding: 3px 5px; border-radius: 5px;
+      border: 1px solid var(--input-bdr); background: var(--input-bg); color: var(--text);
+      flex-shrink: 0;
+    }
+
+    /* ── Restock history ── */
+    .restock-log { margin-top: 8px; }
+    .restock-item { font-size: 10.5px; padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; gap: 6px; }
+    .restock-item:last-child { border-bottom: none; }
+    .restock-in  { color: var(--ok-txt); font-weight: 700; }
+    .restock-out { color: var(--warn-txt); font-weight: 700; }
+
+    /* ── Wishlist import ── */
+    .wishlist-row { display: flex; gap: 6px; margin-top: 8px; }
+    .wishlist-btn { padding: 6px 10px; border-radius: 7px; border: none; background: var(--blue); color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .wishlist-btn:hover { opacity: 0.85; }
+    body.dark .wishlist-btn { background: #1a5fc8; }
+
+    /* ── Auto-refresh interval ── */
+    .refresh-interval-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .refresh-interval-row label { font-size: 11px; color: var(--text2); }
+    .refresh-interval-row input { width: 60px; font-size: 12px; padding: 4px 7px; border-radius: 6px; border: 1.5px solid var(--input-bdr); background: var(--input-bg); color: var(--text); }
+    .refresh-interval-row span  { font-size: 11px; color: var(--text3); }
   </style>
 </head>
 <body>
@@ -490,7 +544,10 @@
   </div>
   <div class="pokedex-title-row">
     <span class="pokedex-name">POKÉBOT</span>
-    <span class="pokedex-status" id="header-sub">Scanning…</span>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="pokedex-status" id="streak-display" style="background:rgba(255,215,0,0.15);color:#FFD700;display:none;">🎴 <span id="streak-count">0</span></span>
+      <span class="pokedex-status" id="header-sub">Scanning…</span>
+    </div>
   </div>
 </div>
 
@@ -501,6 +558,7 @@
   <div class="tab" data-tab="schedule">⏰ Schedule</div>
   <div class="tab" data-tab="info">📖 Info</div>
   <div class="tab" data-tab="pokemon">🔍 Pokémon</div>
+  <div class="tab" data-tab="settings">⚙️</div>
 </div>
 
 <!-- ══ MAIN panel ══ -->
@@ -682,7 +740,7 @@
       <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Deal card</strong> — instantly shows if the current product is a Great Deal, At MSRP, Overpriced, or Scalper Price based on real Pokémon Center MSRP data.</div></div>
       <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Price history chart</strong> — records each price seen and shows a trend (rising/falling) so you know if the price is moving.</div></div>
       <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Stock Sniper</strong> — watches the current page every 2.5 seconds. The moment it comes in stock at or under MSRP, it notifies you and flashes the buy button. Enable Auto-Buy to purchase automatically. Handles reload waves (items that flicker in/out of stock).</div></div>
-      <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Multi-URL Sniper</strong> — paste URLs for multiple products (any supported site). Pokébot checks all of them in the background every 15 seconds and triggers when any of them hit MSRP.</div></div>
+      <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Multi-URL Sniper</strong> — paste URLs for multiple products (any supported site). Pokébot checks all of them in the background every 10 seconds and triggers when any of them hit MSRP.</div></div>
       <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Panic Stop</strong> — immediately kills all snipers, timers, and background checks with one click.</div></div>
     </div>
 
@@ -751,6 +809,12 @@
       </div>
     </div>
 
+    <!-- Restock history -->
+    <div id="pk-restock-box" class="chart-box" style="display:none">
+      <div class="chart-label">Restock history</div>
+      <div class="restock-log" id="pk-restock-log"></div>
+    </div>
+
     <!-- Sniper mode -->
     <div class="sniper-box">
       <div class="sniper-header">
@@ -778,17 +842,103 @@
         <span class="sniper-title">🌐 Multi-URL Sniper</span>
         <div class="toggle" id="tog-multisniper"><div class="toggle-thumb"></div></div>
       </div>
-      <div class="sniper-desc" style="margin-bottom:6px;">Watch multiple product pages in the background. Pokébot checks each one every 15 seconds and notifies (or auto-buys) when any hit MSRP.</div>
+      <div class="sniper-desc" style="margin-bottom:6px;">Watch multiple product pages in the background. Pokébot checks each one every 10 seconds and notifies (or auto-buys) when any hit MSRP.</div>
       <div class="url-list" id="multi-url-list"></div>
       <div class="url-add-row">
         <input class="field-input" type="url" id="multi-url-input" placeholder="https://www.target.com/p/..."/>
         <button class="url-add-btn" id="multi-url-add-btn">+ Add</button>
+      </div>
+      <div class="wishlist-row">
+        <input class="field-input" type="url" id="wishlist-url-input" placeholder="Paste wishlist/list URL…" style="font-size:11px;padding:6px 8px;"/>
+        <button class="wishlist-btn" id="wishlist-import-btn">📋 Import</button>
       </div>
       <div class="multi-hit-log" id="multi-hit-log"></div>
     </div>
 
     <!-- Panic stop -->
     <button id="panic-btn">⛔ PANIC STOP</button>
+
+  </div>
+</div>
+
+
+<!-- ══ NOTIFICATION LOG (inside Pokémon panel, accessible via button) ══ -->
+
+<!-- ══ SETTINGS panel ══ -->
+<div class="panel" id="panel-settings">
+  <div class="panel-body">
+
+    <div class="settings-section">
+      <div class="settings-section-title">Purchase</div>
+      <div class="settings-opt">
+        <div class="settings-opt-info">
+          <div class="settings-opt-label">⚡ Faster Catch It</div>
+          <div class="settings-opt-sub">Enable keyboard shortcut to trigger instantly</div>
+        </div>
+        <div class="toggle" id="tog-faster-catch"><div class="toggle-thumb"></div></div>
+      </div>
+      <div style="margin-top:4px;margin-bottom:8px;">
+        <span class="settings-shortcut">Alt + Shift + C</span>
+        <span style="font-size:10px;color:var(--text3);margin-left:6px;">— fires Catch It on current page</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Sniper</div>
+      <div class="settings-opt">
+        <div class="settings-opt-info">
+          <div class="settings-opt-label">🔊 Sound Alerts</div>
+          <div class="settings-opt-sub">Beep when sniper hits or item is bought</div>
+        </div>
+        <div class="toggle" id="tog-sound"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="settings-opt">
+        <div class="settings-opt-info">
+          <div class="settings-opt-label">🔄 Auto-Refresh</div>
+          <div class="settings-opt-sub">Reload the product page on an interval</div>
+        </div>
+        <div class="toggle" id="tog-auto-refresh"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="refresh-interval-row" id="refresh-interval-row" style="display:none">
+        <label>Every</label>
+        <input type="number" id="refresh-interval-val" min="3" max="60" value="5"/>
+        <span>seconds</span>
+      </div>
+      <div class="settings-opt">
+        <div class="settings-opt-info">
+          <div class="settings-opt-label">🛒 Cart Protection</div>
+          <div class="settings-opt-sub">Alert if item disappears from your cart</div>
+        </div>
+        <div class="toggle" id="tog-cart-protect"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Notification Log</div>
+      <div class="notif-log" id="notif-log">
+        <div class="notif-empty">No notifications yet</div>
+      </div>
+      <button class="poke-btn secondary" id="clear-notif-btn" style="margin-top:8px;">Clear log</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Data</div>
+      <div class="settings-opt">
+        <div class="settings-opt-info">
+          <div class="settings-opt-label">🏆 Catches</div>
+          <div class="settings-opt-sub">Total successful purchases made by Pokébot</div>
+        </div>
+        <span id="streak-setting-count" style="font-size:18px;font-weight:700;color:var(--red);">0</span>
+      </div>
+      <button class="poke-btn secondary" id="reset-streak-btn" style="margin-top:4px;">Reset catch count</button>
+      <div class="export-import-row">
+        <button class="export-btn" id="export-btn">📤 Export settings</button>
+        <label class="import-btn" style="text-align:center;line-height:1.8;cursor:pointer;">
+          📥 Import settings
+          <input type="file" id="import-file" accept=".json" style="display:none;"/>
+        </label>
+      </div>
+    </div>
 
   </div>
 </div>
