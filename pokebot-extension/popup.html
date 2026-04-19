@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Pokébot</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Theme variables ── */
+    :root {
+      --red:      #E3350D;
+      --red-d:    #b82a0a;
+      --red-l:    #fde8e3;
+      --yellow:   #F5C542;
+      --yellow-d: #c49a1a;
+      --yellow-l: #fef9e7;
+      --blue:     #3B6CD4;
+      --blue-l:   #e8eefb;
+      --white:    #FFFFFF;
+      --ball-r:   #CC0000;
+      --ball-b:   #1a1a1a;
+    }
+
+    /* Light mode */
+    body {
+      --bg:         #f5f5f0;
+      --surface:    #ffffff;
+      --surface2:   #f0ede8;
+      --border:     #ddd8d0;
+      --text:       #1a1a1a;
+      --text2:      #555;
+      --text3:      #888;
+      --header-bg:  var(--red);
+      --header-txt: #ffffff;
+      --tab-bg:     #f0ede8;
+      --tab-act:    #ffffff;
+      --tab-txt:    #888;
+      --tab-act-t:  var(--red);
+      --btn-bg:     var(--red);
+      --btn-txt:    #fff;
+      --btn-hover:  var(--red-d);
+      --step-pend:  #e8e8e8;
+      --step-pend-t:#888;
+      --step-act-b: #fff3cd;
+      --step-act-t: #856404;
+      --step-done-b:#d4edda;
+      --step-done-t:#155724;
+      --step-err-b: #f8d7da;
+      --step-err-t: #721c24;
+      --toggle-off: #ccc;
+      --toggle-on:  var(--red);
+      --input-bg:   #fff;
+      --input-bdr:  #ccc;
+      --warn-bg:    #fde8e3;
+      --warn-txt:   var(--red);
+      --ok-bg:      #d4edda;
+      --ok-txt:     #155724;
+      --info-bg:    #e8eefb;
+      --info-txt:   var(--blue);
+      --pokedex-top:#CC0000;
+      --pokedex-bot:#1a1a1a;
+    }
+
+    body.dark {
+      --bg:         #1a1a2e;
+      --surface:    #16213e;
+      --surface2:   #0f3460;
+      --border:     #2a2a4a;
+      --text:       #e8e8ff;
+      --text2:      #aaa;
+      --text3:      #666;
+      --header-bg:  #CC0000;
+      --header-txt: #fff;
+      --tab-bg:     #0f3460;
+      --tab-act:    #16213e;
+      --tab-txt:    #888;
+      --tab-act-t:  #FFD700;
+      --btn-bg:     #CC0000;
+      --btn-txt:    #fff;
+      --btn-hover:  #a00;
+      --step-pend:  #2a2a4a;
+      --step-pend-t:#666;
+      --step-act-b: #3d3000;
+      --step-act-t: #FFD700;
+      --step-done-b:#0d2e16;
+      --step-done-t:#4ade80;
+      --step-err-b: #2e0d0d;
+      --step-err-t: #f87171;
+      --toggle-off: #444;
+      --toggle-on:  #CC0000;
+      --input-bg:   #0f3460;
+      --input-bdr:  #2a2a4a;
+      --warn-bg:    #2e0d0d;
+      --warn-txt:   #f87171;
+      --ok-bg:      #0d2e16;
+      --ok-txt:     #4ade80;
+      --info-bg:    #0d1e3d;
+      --info-txt:   #93c5fd;
+      --pokedex-top:#CC0000;
+      --pokedex-bot:#1a1a2e;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      width: 340px;
+      color: var(--text);
+      font-size: 13px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Pokédex header ── */
+    .pokedex-header {
+      background: var(--header-bg);
+      padding: 10px 12px 8px;
+      position: relative;
+    }
+    .pokedex-top-strip {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .pokeball-light {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #3B6CD4;
+      border: 2px solid rgba(255,255,255,0.6);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+      flex-shrink: 0;
+    }
+    .pokeball-sm { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .pokeball-sm.red    { background: #ff4444; border: 1.5px solid rgba(255,255,255,0.5); }
+    .pokeball-sm.yellow { background: #FFD700; border: 1.5px solid rgba(255,255,255,0.5); }
+    .pokeball-sm.green  { background: #44ff88; border: 1.5px solid rgba(255,255,255,0.5); }
+    .theme-toggle {
+      margin-left: auto; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px; padding: 3px 8px; font-size: 10px; color: #fff;
+      cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .theme-toggle:hover { background: rgba(255,255,255,0.35); }
+
+    .pokedex-title-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pokedex-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px; color: #fff; letter-spacing: 1px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+    }
+    .pokedex-status {
+      font-size: 10px; color: rgba(255,255,255,0.75);
+      background: rgba(0,0,0,0.2); border-radius: 10px;
+      padding: 2px 7px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; background: var(--tab-bg);
+      border-bottom: 2px solid var(--red);
+    }
+    .tab {
+      flex: 1; padding: 7px 2px; text-align: center; font-size: 10px; font-weight: 600;
+      cursor: pointer; color: var(--tab-txt); transition: all 0.15s;
+      border-bottom: 2px solid transparent; margin-bottom: -2px;
+      user-select: none; letter-spacing: 0.3px;
+    }
+    .tab:hover { color: var(--tab-act-t); }
+    .tab.active { color: var(--tab-act-t); border-bottom-color: var(--tab-act-t); background: var(--tab-act); }
+
+    /* ── Panel ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel-body { padding: 12px; }
+
+    /* ── No product state ── */
+    #no-product {
+      padding: 20px 12px; text-align: center; display: none;
+    }
+    .no-product-ball {
+      font-size: 32px; margin-bottom: 8px;
+    }
+    #no-product p { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+    /* ── Product card ── */
+    .product-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 10px 11px; margin-bottom: 10px;
+      position: relative; overflow: hidden;
+    }
+    .product-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--red) 0%, var(--yellow) 100%);
+    }
+    .product-name {
+      font-size: 11.5px; font-weight: 600; line-height: 1.35;
+      color: var(--text); margin-bottom: 5px;
+    }
+    .price-row { display: flex; align-items: center; gap: 6px; }
+    .product-price { font-size: 14px; font-weight: 700; color: var(--red); }
+    .budget-badge {
+      font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 20px;
+      display: none;
+    }
+    .budget-badge.over  { background: var(--warn-bg); color: var(--warn-txt); display: inline-block; }
+    .budget-badge.ok    { background: var(--ok-bg);   color: var(--ok-txt);   display: inline-block; }
+
+    /* ── Options ── */
+    .section-label {
+      font-size: 9px; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin: 10px 0 6px;
+    }
+    .opt-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--border);
+    }
+    .opt-row:last-child { border-bottom: none; }
+    .opt-label { font-size: 11.5px; color: var(--text); }
+    .opt-sub   { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+    .toggle {
+      width: 34px; height: 19px; border-radius: 10px;
+      background: var(--toggle-off); position: relative;
+      cursor: pointer; transition: background 0.18s; flex-shrink: 0;
+    }
+    .toggle.on { background: var(--toggle-on); }
+    .toggle-thumb {
+      width: 15px; height: 15px; border-radius: 50%; background: #fff;
+      position: absolute; top: 2px; left: 2px; transition: left 0.18s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle.on .toggle-thumb { left: 17px; }
+
+    /* ── CTA button ── */
+    .cta-wrap { margin-top: 10px; }
+    #cta-btn {
+      width: 100%; padding: 11px 10px;
+      border-radius: 9px; border: none;
+      background: var(--btn-bg); color: var(--btn-txt);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.5px; line-height: 1.4;
+    }
+    #cta-btn:hover:not(:disabled) { background: var(--btn-hover); }
+    #cta-btn:active:not(:disabled) { transform: scale(0.98); }
+    #cta-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #budget-block-msg {
+      font-size: 10px; color: var(--warn-txt); text-align: center;
+      margin-top: 5px; display: none; line-height: 1.4;
+    }
+
+    /* ── Steps ── */
+    .steps-box {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 9px; overflow: hidden; margin-top: 10px;
+    }
+    .steps-header {
+      padding: 5px 10px; background: var(--surface2);
+      font-size: 9px; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-bottom: 1px solid var(--border);
+    }
+    .step-item:last-child { border-bottom: none; }
+    .step-icon {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700;
+    }
+    .step-icon.pending  { background: var(--step-pend);   color: var(--step-pend-t); }
+    .step-icon.active   { background: var(--step-act-b);  color: var(--step-act-t);  }
+    .step-icon.done     { background: var(--step-done-b); color: var(--step-done-t); }
+    .step-icon.skipped  { background: var(--step-pend);   color: var(--step-pend-t); }
+    .step-icon.error    { background: var(--step-err-b);  color: var(--step-err-t);  }
+    .step-text { font-size: 11px; color: var(--text2); flex: 1; }
+    .step-text.active  { color: var(--text);           font-weight: 600; }
+    .step-text.done    { color: var(--step-done-t); }
+    .step-text.error   { color: var(--step-err-t);  }
+    .step-text.skipped { color: var(--text3); }
+
+    /* ── Budget panel ── */
+    .field-label { font-size: 10px; font-weight: 600; color: var(--text2); margin-bottom: 4px; display: block; }
+    .field-input {
+      width: 100%; padding: 8px 10px; border: 1.5px solid var(--input-bdr);
+      border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif;
+      color: var(--text); background: var(--input-bg); outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus { border-color: var(--red); }
+    .field-row { margin-bottom: 10px; }
+    .status-box {
+      padding: 8px 10px; border-radius: 8px; font-size: 11px;
+      line-height: 1.45; margin: 8px 0; display: none;
+    }
+    .status-box.warn { background: var(--warn-bg); color: var(--warn-txt); display: block; }
+    .status-box.ok   { background: var(--ok-bg);   color: var(--ok-txt);   display: block; }
+    .status-box.info { background: var(--info-bg);  color: var(--info-txt); display: block; }
+
+    .poke-btn {
+      width: 100%; padding: 9px; border-radius: 8px; border: none;
+      background: var(--btn-bg); color: #fff;
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      cursor: pointer; transition: background 0.15s; letter-spacing: 0.5px;
+    }
+    .poke-btn:hover { background: var(--btn-hover); }
+    .poke-btn.secondary {
+      background: transparent; color: var(--text2);
+      border: 1.5px solid var(--border); font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 600; margin-top: 6px;
+    }
+    .poke-btn.secondary:hover { background: var(--surface2); }
+
+    /* ── Schedule panel ── */
+    .datetime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .sched-status-box { padding: 9px 10px; border-radius: 8px; margin: 8px 0; display: none; }
+    .sched-status-box.armed { background: var(--info-bg);  color: var(--info-txt); display: block; }
+    .sched-status-box.fired { background: var(--ok-bg);    color: var(--ok-txt);   display: block; }
+    .sched-label { font-size: 11px; font-weight: 600; }
+    .sched-countdown { font-size: 11px; margin-top: 3px; opacity: 0.8; }
+
+    /* ── Info panel ── */
+    .info-section { margin-bottom: 14px; }
+    .info-title {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      color: var(--red); margin-bottom: 6px; letter-spacing: 0.5px;
+    }
+    .info-p { font-size: 11px; color: var(--text2); line-height: 1.6; }
+    .info-step {
+      display: flex; gap: 8px; align-items: flex-start;
+      padding: 5px 0; border-bottom: 1px solid var(--border);
+    }
+    .info-step:last-child { border-bottom: none; }
+    .info-num {
+      width: 20px; height: 20px; border-radius: 50%; background: var(--red);
+      color: #fff; font-size: 9px; font-weight: 700; display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .info-step-text { font-size: 11px; color: var(--text); line-height: 1.5; flex: 1; }
+    .info-step-text strong { color: var(--red); }
+    .info-divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .tip-box {
+      background: var(--yellow-l); border-left: 3px solid var(--yellow);
+      border-radius: 0 6px 6px 0; padding: 8px 10px;
+      font-size: 11px; color: #5a4a00; line-height: 1.5;
+    }
+    body.dark .tip-box { background: #2a2000; color: #ffd54f; border-color: var(--yellow); }
+
+    /* ── Pokémon tab ── */
+    .deal-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 10px; overflow: hidden; margin-bottom: 10px;
+      position: relative;
+    }
+    .deal-stripe { height: 4px; width: 100%; }
+    .deal-stripe.great   { background: linear-gradient(90deg, #22cc88, #00aa55); }
+    .deal-stripe.msrp    { background: linear-gradient(90deg, #4488ff, #2266cc); }
+    .deal-stripe.slight  { background: linear-gradient(90deg, #ffb300, #cc8800); }
+    .deal-stripe.over    { background: linear-gradient(90deg, #ff8c00, #cc5500); }
+    .deal-stripe.scalper { background: linear-gradient(90deg, var(--red), #990000); }
+    .deal-stripe.unknown { background: linear-gradient(90deg, #aaa, #888); }
+    .deal-body { padding: 10px 11px 11px; }
+    .deal-product { font-size: 11.5px; font-weight: 600; line-height: 1.35; color: var(--text); margin-bottom: 7px; }
+    .deal-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 5px; }
+    .deal-price { font-size: 18px; font-weight: 700; color: var(--red); }
+    .deal-msrp  { font-size: 10.5px; color: var(--text3); }
+    .deal-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px; margin-bottom: 7px;
+    }
+    .deal-badge.great   { background: var(--ok-bg);   color: var(--ok-txt); }
+    .deal-badge.msrp    { background: var(--info-bg);  color: var(--info-txt); }
+    .deal-badge.slight  { background: #fff8e1; color: #a06000; }
+    .deal-badge.over    { background: #fff3e0; color: #c05000; }
+    .deal-badge.scalper { background: var(--warn-bg);  color: var(--warn-txt); }
+    .deal-badge.unknown { background: var(--surface2); color: var(--text3); }
+    body.dark .deal-badge.slight { background: #2a2000; color: #ffb300; }
+    body.dark .deal-badge.over   { background: #2a1500; color: #ff8c00; }
+    .deal-detail { font-size: 10.5px; color: var(--text2); line-height: 1.6; }
+    .deal-detail b { color: var(--text); }
+    .stock-row { display: flex; align-items: center; gap: 6px; margin-top: 7px; }
+    .stock-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .stock-dot.in  { background: #22cc88; box-shadow: 0 0 5px #22cc8888; }
+    .stock-dot.out { background: var(--red); }
+    .stock-dot.unk { background: var(--text3); }
+    .stock-label { font-size: 11px; font-weight: 700; }
+    .stock-label.in  { color: #22cc88; }
+    .stock-label.out { color: var(--red); }
+    .stock-label.unk { color: var(--text3); }
+    .trend-row { display: flex; align-items: center; gap: 5px; margin-top: 4px; }
+    .trend-text { font-size: 10.5px; }
+    .trend-rising  { color: var(--red); }
+    .trend-falling { color: #22cc88; }
+    .trend-stable  { color: var(--text3); }
+    .chart-box { background: var(--surface2); border-radius: 8px; padding: 8px 10px; margin-top: 10px; }
+    .chart-label { font-size: 9px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 2px; height: 36px; }
+    .chart-bar { flex: 1; border-radius: 2px 2px 0 0; min-width: 6px; }
+    .chart-empty { font-size: 10px; color: var(--text3); text-align: center; line-height: 36px; }
+    .chart-range { display: flex; justify-content: space-between; margin-top: 3px; font-size: 9px; color: var(--text3); }
+    .sniper-box { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 12px; margin-bottom: 10px; }
+    .sniper-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .sniper-title { font-size: 11.5px; font-weight: 700; color: var(--text); }
+    .sniper-desc  { font-size: 10.5px; color: var(--text2); line-height: 1.5; margin-bottom: 9px; }
+    .sniper-hit-box { margin-top: 8px; padding: 8px 10px; border-radius: 7px; background: var(--ok-bg); color: var(--ok-txt); font-size: 11px; line-height: 1.5; display: none; }
+    .sniper-watching { margin-top: 8px; padding: 7px 10px; border-radius: 7px; background: var(--info-bg); color: var(--info-txt); font-size: 10.5px; display: none; align-items: center; gap: 6px; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; animation: pulseDot 1.2s ease-in-out infinite; }
+    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+    #panic-btn { width: 100%; padding: 9px; border-radius: 8px; border: 1.5px solid var(--red); background: transparent; color: var(--red); font-family: 'Press Start 2P', monospace; font-size: 8px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px; margin-top: 4px; }
+    #panic-btn:hover { background: var(--warn-bg); }
+    #panic-btn:active { transform: scale(0.97); }
+    .pk-scan { padding: 20px 12px; text-align: center; }
+    .pk-scan-ball { width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 10px; background: linear-gradient(180deg, var(--red) 50%, #222 50%); border: 3px solid var(--border); position: relative; animation: spinBall 1.4s linear infinite; }
+    .pk-scan-ball::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:8px; height:8px; border-radius:50%; background:#fff; border:1.5px solid #555; }
+    @keyframes spinBall { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    .pk-scan-text { font-size:11px; color:var(--text2); font-weight:600; }
+    .pk-not-tcg { padding:18px 12px; text-align:center; }
+    .pk-not-tcg-emoji { font-size:30px; margin-bottom:8px; }
+    .pk-not-tcg p { font-size:11px; color:var(--text2); line-height:1.6; }
+
+    /* ── Multi-URL sniper ── */
+    .url-list { margin-top: 8px; }
+    .url-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 7px; margin-bottom: 5px;
+    }
+    .url-item-label { flex: 1; font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .url-item-status { font-size: 10px; font-weight: 700; }
+    .url-item-status.hit  { color: #22cc88; }
+    .url-item-status.watching { color: var(--info-txt); }
+    .url-remove-btn { border: none; background: none; color: var(--text3); font-size: 14px; cursor: pointer; padding: 0 2px; line-height: 1; }
+    .url-remove-btn:hover { color: var(--warn-txt); }
+    .url-add-row { display: flex; gap: 6px; margin-top: 6px; }
+    .url-add-row .field-input { font-size: 11px; padding: 6px 8px; }
+    .url-add-btn { flex-shrink: 0; padding: 6px 10px; border-radius: 7px; border: none; background: var(--btn-bg); color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .url-add-btn:hover { background: var(--btn-hover); }
+    .multi-hit-log { margin-top: 8px; }
+    .multi-hit-item { font-size: 10.5px; color: var(--ok-txt); background: var(--ok-bg); border-radius: 6px; padding: 5px 8px; margin-bottom: 4px; }
+
+    /* ── Multi-schedule ── */
+    .sched-list { margin-top: 8px; }
+    .sched-item {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 9px; padding: 9px 10px; margin-bottom: 8px;
+    }
+    .sched-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+    .sched-item-label { font-size: 11.5px; font-weight: 600; color: var(--text); flex: 1; }
+    .sched-item-badge {
+      font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: 6px;
+    }
+    .sched-item-badge.armed  { background: var(--info-bg); color: var(--info-txt); }
+    .sched-item-badge.fired  { background: var(--ok-bg);   color: var(--ok-txt); }
+    .sched-item-badge.idle   { background: var(--surface2); color: var(--text3); }
+    .sched-item-time { font-size: 10px; color: var(--text2); margin-bottom: 4px; }
+    .sched-item-countdown { font-size: 10px; color: var(--info-txt); }
+    .sched-item-actions { display: flex; gap: 5px; margin-top: 6px; }
+    .sched-cancel-btn, .sched-remove-btn {
+      flex: 1; padding: 5px; border-radius: 6px; font-size: 10px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--text2);
+    }
+    .sched-cancel-btn:hover { background: var(--warn-bg); color: var(--warn-txt); border-color: var(--warn-txt); }
+    .sched-remove-btn:hover { background: var(--surface2); }
+    .sched-add-form {
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 9px; padding: 10px; margin-top: 8px;
+    }
+    .sched-add-title { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+    .sched-url-row { display: flex; gap: 6px; margin-bottom: 7px; }
+    .sched-url-row .field-input { font-size: 11px; padding: 6px 8px; }
+    .sched-url-current { font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+    .add-sched-btn { width: 100%; padding: 8px; border-radius: 7px; border: none; background: var(--btn-bg); color: #fff; font-family: 'Press Start 2P', monospace; font-size: 8px; cursor: pointer; letter-spacing: 0.5px; }
+    .add-sched-btn:hover { background: var(--btn-hover); }
+  </style>
+</head>
+<body>
+
+<!-- Pokédex header -->
+<div class="pokedex-header">
+  <div class="pokedex-top-strip">
+    <div class="pokeball-light"></div>
+    <div class="pokeball-sm red"></div>
+    <div class="pokeball-sm yellow"></div>
+    <div class="pokeball-sm green"></div>
+    <button class="theme-toggle" id="theme-toggle">🌙 Dark</button>
+  </div>
+  <div class="pokedex-title-row">
+    <span class="pokedex-name">POKÉBOT</span>
+    <span class="pokedex-status" id="header-sub">Scanning…</span>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="main">⚡ Cart</div>
+  <div class="tab" data-tab="budget">💰 Budget</div>
+  <div class="tab" data-tab="schedule">⏰ Schedule</div>
+  <div class="tab" data-tab="info">📖 Info</div>
+  <div class="tab" data-tab="pokemon">🔍 Pokémon</div>
+</div>
+
+<!-- ══ MAIN panel ══ -->
+<div class="panel active" id="panel-main">
+
+  <div id="no-product" style="display:none">
+    <div class="no-product-ball">⚪</div>
+    <p>No product detected.<br>Navigate to a product page on Target, Walmart, Best Buy, or Amazon to use Pokébot.</p>
+  </div>
+
+  <div id="main-content" style="display:none">
+    <div class="panel-body" style="padding-bottom:0">
+
+      <!-- Product card -->
+      <div class="product-card">
+        <div class="product-name" id="product-title">—</div>
+        <div class="price-row">
+          <span class="product-price" id="product-price"></span>
+          <span class="budget-badge" id="budget-badge"></span>
+        </div>
+      </div>
+
+      <!-- Automation options -->
+      <div class="section-label">Automation</div>
+      <div class="opt-row">
+        <div>
+          <div class="opt-label">Dismiss popup</div>
+          <div class="opt-sub">Close the "added to cart" modal</div>
+        </div>
+        <div class="toggle on" id="tog-dismiss"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="opt-row">
+        <div>
+          <div class="opt-label">Go to checkout</div>
+          <div class="opt-sub">Navigate to target.com/checkout</div>
+        </div>
+        <div class="toggle on" id="tog-cart"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="opt-row">
+        <div>
+          <div class="opt-label">Save &amp; continue</div>
+          <div class="opt-sub">Confirm shipping on checkout page</div>
+        </div>
+        <div class="toggle" id="tog-checkout"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="opt-row">
+        <div>
+          <div class="opt-label">Place order</div>
+          <div class="opt-sub">Save & Continue + Place Order</div>
+        </div>
+        <div class="toggle" id="tog-placeorder"><div class="toggle-thumb"></div></div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-wrap">
+        <button id="cta-btn">⚡ CATCH IT</button>
+        <div id="budget-block-msg"></div>
+      </div>
+    </div>
+
+    <!-- Steps -->
+    <div style="padding: 10px 12px 12px">
+      <div class="steps-box">
+        <div class="steps-header">Battle log</div>
+        <div class="step-item"><div class="step-icon pending" id="s1-icon">1</div><div class="step-text" id="s1-text">Add to cart</div></div>
+        <div class="step-item"><div class="step-icon pending" id="s2-icon">2</div><div class="step-text" id="s2-text">Close popup</div></div>
+        <div class="step-item"><div class="step-icon pending" id="s3-icon">3</div><div class="step-text" id="s3-text">Go to checkout</div></div>
+        <div class="step-item"><div class="step-icon pending" id="s4-icon">4</div><div class="step-text" id="s4-text">Save &amp; continue</div></div>
+        <div class="step-item"><div class="step-icon pending" id="s5-icon">5</div><div class="step-text" id="s5-text">Place order</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BUDGET panel ══ -->
+<div class="panel" id="panel-budget">
+  <div class="panel-body">
+    <div class="section-label" style="margin-top:0">Budget guard</div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:12px; line-height:1.5;">
+      Set a maximum price. If the product costs more, the "Catch It" button disables. For scheduled runs, Pokébot will still add to cart but will <strong>stop before checkout</strong> if over budget.
+    </p>
+
+    <div class="field-row">
+      <label class="field-label" for="budget-input">Maximum price ($)</label>
+      <input class="field-input" type="number" id="budget-input" min="0.01" step="0.01" placeholder="e.g. 59.99"/>
+    </div>
+    <div id="budget-status" class="status-box"></div>
+    <button class="poke-btn" id="budget-save">SAVE BUDGET</button>
+    <button class="poke-btn secondary" id="budget-clear">Clear budget</button>
+  </div>
+</div>
+
+<!-- ══ SCHEDULE panel ══ -->
+<div class="panel" id="panel-schedule">
+  <div class="panel-body">
+    <div class="section-label" style="margin-top:0">Scheduled Auto-Fire</div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:10px; line-height:1.5;">
+      Set one or more schedules — each with its own URL, time, and settings. Pokébot fires each one independently.
+    </p>
+
+    <!-- Existing schedules list -->
+    <div class="sched-list" id="sched-list"></div>
+
+    <!-- Add new schedule form -->
+    <div class="sched-add-form">
+      <div class="sched-add-title">New Schedule</div>
+      <div class="sched-url-current" id="sched-url-current">URL: current page</div>
+      <div class="sched-url-row">
+        <input class="field-input" type="url" id="sched-url-input" placeholder="Or paste URL…" style="font-size:11px; padding:6px 8px;"/>
+      </div>
+      <div class="field-row">
+        <label class="field-label" for="sched-label-input">Label (optional)</label>
+        <input class="field-input" type="text" id="sched-label-input" placeholder="e.g. Destined Rivals ETB" style="font-size:12px;"/>
+      </div>
+      <div class="field-row">
+        <label class="field-label" for="sched-date">Date</label>
+        <input class="field-input" type="date" id="sched-date"/>
+      </div>
+      <div class="datetime-grid" style="margin-bottom:10px;">
+        <div>
+          <label class="field-label" for="sched-time">Time</label>
+          <input class="field-input" type="time" id="sched-time"/>
+        </div>
+        <div>
+          <label class="field-label" for="sched-tz">Timezone</label>
+          <select class="field-input" id="sched-tz" style="padding:7px 8px;">
+            <option value="local">Local</option>
+            <option value="America/New_York">ET</option>
+            <option value="America/Chicago">CT</option>
+            <option value="America/Denver">MT</option>
+            <option value="America/Los_Angeles">PT</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </div>
+      </div>
+      <button class="add-sched-btn" id="sched-arm">ADD SCHEDULE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INFO panel ══ -->
+<div class="panel" id="panel-info">
+  <div class="panel-body">
+
+    <div class="info-section">
+      <div class="info-title">WHAT IS POKÉBOT?</div>
+      <p class="info-p">Pokébot automates buying Pokémon TCG products on <strong>Target, Walmart, Best Buy, and Amazon</strong>. From add-to-cart to placed order in seconds. Perfect for limited drops like ETBs and booster boxes.</p>
+    </div>
+
+    <div class="info-divider"></div>
+
+    <div class="info-section">
+      <div class="info-title">⚡ CART TAB</div>
+      <div class="info-step"><div class="info-num">1</div><div class="info-step-text"><strong>Add to cart</strong> — clicks the Add to Cart button. Retries automatically if the page is slow (Retry System).</div></div>
+      <div class="info-step"><div class="info-num">2</div><div class="info-step-text"><strong>Close popup</strong> — dismisses the confirmation modal so it doesn't block navigation.</div></div>
+      <div class="info-step"><div class="info-num">3</div><div class="info-step-text"><strong>Go to checkout</strong> — jumps straight to the checkout URL, skipping the cart page entirely.</div></div>
+      <div class="info-step"><div class="info-num">4</div><div class="info-step-text"><strong>Save &amp; continue</strong> — confirms your saved shipping address (toggle on to enable).</div></div>
+      <div class="info-step"><div class="info-num">5</div><div class="info-step-text"><strong>Place order</strong> — clicks Place Your Order. Requires a saved payment method on your account.</div></div>
+    </div>
+
+    <div class="info-divider"></div>
+
+    <div class="info-section">
+      <div class="info-title">💰 BUDGET GUARD</div>
+      <p class="info-p">Set a maximum price. The Catch It button disables if the product costs more. For scheduled and sniper runs, Pokébot still adds to cart but stops before checkout if over budget — so you stay in control.</p>
+    </div>
+
+    <div class="info-divider"></div>
+
+    <div class="info-section">
+      <div class="info-title">⏰ MULTI-SCHEDULE</div>
+      <p class="info-p">Add multiple schedules — each with its own URL, label, date, and time. Pokébot fires each independently when the time comes, even if the popup is closed. Great for drops happening on different sites at the same time.</p>
+    </div>
+
+    <div class="info-divider"></div>
+
+    <div class="info-section">
+      <div class="info-title">🔍 POKÉMON TAB</div>
+      <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Deal card</strong> — instantly shows if the current product is a Great Deal, At MSRP, Overpriced, or Scalper Price based on real Pokémon Center MSRP data.</div></div>
+      <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Price history chart</strong> — records each price seen and shows a trend (rising/falling) so you know if the price is moving.</div></div>
+      <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Stock Sniper</strong> — watches the current page every 2.5 seconds. The moment it comes in stock at or under MSRP, it notifies you and flashes the buy button. Enable Auto-Buy to purchase automatically. Handles reload waves (items that flicker in/out of stock).</div></div>
+      <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Multi-URL Sniper</strong> — paste URLs for multiple products (any supported site). Pokébot checks all of them in the background every 15 seconds and triggers when any of them hit MSRP.</div></div>
+      <div class="info-step"><div class="info-num">★</div><div class="info-step-text"><strong>Panic Stop</strong> — immediately kills all snipers, timers, and background checks with one click.</div></div>
+    </div>
+
+    <div class="info-divider"></div>
+
+    <div class="tip-box">
+      💡 <strong>Tips:</strong> Make sure your shipping address and payment are saved before enabling Place Order. For best sniper results, navigate to the exact product page first. Multi-URL sniper works even when you're browsing other tabs.
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══ POKÉMON panel ══ -->
+<div class="panel" id="panel-pokemon">
+
+  <!-- Scanning state -->
+  <div id="pk-scanning" class="pk-scan" style="display:none">
+    <div class="pk-scan-ball"></div>
+    <div class="pk-scan-text">Scanning product…</div>
+  </div>
+
+  <!-- Not a TCG product -->
+  <div id="pk-not-tcg" class="pk-not-tcg" style="display:none">
+    <div class="pk-not-tcg-emoji">🃏</div>
+    <p>This doesn't look like a Pokémon or TCG product.<br>Navigate to a booster box, ETB, tin, or collection to use this tab.</p>
+  </div>
+
+  <!-- Not on Target -->
+  <div id="pk-not-target" class="pk-not-tcg" style="display:none">
+    <div class="pk-not-tcg-emoji">🎯</div>
+    <p>Navigate to a product page on<br><strong>Target</strong>, <strong>Walmart</strong>, <strong>Best Buy</strong>, or <strong>Amazon</strong><br>to use Pokébot.</p>
+  </div>
+
+  <!-- Main deal content -->
+  <div id="pk-content" class="panel-body" style="display:none">
+
+    <!-- Deal card -->
+    <div class="deal-card">
+      <div class="deal-stripe" id="pk-stripe"></div>
+      <div class="deal-body">
+        <div class="deal-product" id="pk-title">—</div>
+        <div class="deal-price-row">
+          <span class="deal-price" id="pk-price">—</span>
+          <span class="deal-msrp" id="pk-msrp-label"></span>
+        </div>
+        <div class="deal-badge" id="pk-badge">—</div>
+        <div class="deal-detail" id="pk-detail"></div>
+        <div class="stock-row">
+          <div class="stock-dot unk" id="pk-stock-dot"></div>
+          <span class="stock-label unk" id="pk-stock-label">Checking stock…</span>
+        </div>
+        <div class="trend-row" id="pk-trend-row" style="display:none">
+          <span class="trend-text" id="pk-trend-text"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini price history chart -->
+    <div class="chart-box" id="pk-chart-box" style="display:none">
+      <div class="chart-label">Price history</div>
+      <div class="chart-bars" id="pk-chart-bars"></div>
+      <div class="chart-range">
+        <span id="pk-chart-low"></span>
+        <span id="pk-chart-high"></span>
+      </div>
+    </div>
+
+    <!-- Sniper mode -->
+    <div class="sniper-box">
+      <div class="sniper-header">
+        <span class="sniper-title">🎯 Stock Sniper</span>
+        <div class="toggle" id="tog-sniper"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="sniper-desc">Watches this page in the background. When it comes back in stock at or under MSRP, Pokébot notifies you and flashes the buy button. Enable Auto-Buy to purchase automatically.</div>
+      <div class="opt-row" style="padding:6px 0 8px; border-bottom:1px solid var(--border); margin-bottom:2px;">
+        <div>
+          <div class="opt-label" style="font-size:11px;">Auto-Buy</div>
+          <div class="opt-sub">Automatically purchase when hit</div>
+        </div>
+        <div class="toggle" id="tog-autobuy"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="sniper-watching" id="pk-watching">
+        <div class="pulse-dot"></div>
+        <span>Watching for stock at MSRP…</span>
+      </div>
+      <div class="sniper-hit-box" id="pk-hit-box"></div>
+    </div>
+
+    <!-- Multi-URL Sniper -->
+    <div class="sniper-box" id="multi-sniper-box">
+      <div class="sniper-header">
+        <span class="sniper-title">🌐 Multi-URL Sniper</span>
+        <div class="toggle" id="tog-multisniper"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="sniper-desc" style="margin-bottom:6px;">Watch multiple product pages in the background. Pokébot checks each one every 15 seconds and notifies (or auto-buys) when any hit MSRP.</div>
+      <div class="url-list" id="multi-url-list"></div>
+      <div class="url-add-row">
+        <input class="field-input" type="url" id="multi-url-input" placeholder="https://www.target.com/p/..."/>
+        <button class="url-add-btn" id="multi-url-add-btn">+ Add</button>
+      </div>
+      <div class="multi-hit-log" id="multi-hit-log"></div>
+    </div>
+
+    <!-- Panic stop -->
+    <button id="panic-btn">⛔ PANIC STOP</button>
+
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
